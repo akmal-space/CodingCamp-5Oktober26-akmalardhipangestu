@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Dashboard</title>
+
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+
+  <body class="min-h-screen bg-gray-950 text-gray-100 font-sans">
+
+    <!-- ===== THEME TOGGLE ===== -->
+    <div class="fixed top-4 right-4 z-40">
+      <button id="theme-toggle" class="btn btn-ghost theme-toggle-btn" aria-label="Switch theme">
+        <!-- label + icon set by JS -->
+      </button>
+    </div>
+
+    <!-- ===== TOP BAR: Greeting + Clock ===== -->
+    <header class="text-center pt-12 pb-6 px-4">
+      <!--
+        The greeting is a single flex line:
+          [emoji + "Good morning"] [name input] [pencil | checkmark]
+        JS writes only the static part into #greeting-text.
+      -->
+      <p id="greeting" class="flex items-center justify-center gap-2 text-2xl font-semibold text-indigo-400 tracking-wide w-full flex-wrap">
+        <span id="greeting-text"></span>
+        <input
+          id="greeting-name-input"
+          type="text"
+          placeholder="Your name"
+          maxlength="40"
+          aria-label="Your name for the greeting"
+          readonly
+        />
+        <button id="greeting-edit-btn" title="Edit name" aria-label="Edit your name">✏️</button>
+        <button id="greeting-save-btn" title="Save name" aria-label="Save your name" class="hidden">✅</button>
+      </p>
+
+      <h1 id="clock" class="text-6xl font-bold mt-2 tabular-nums"></h1>
+      <p id="date-display" class="text-gray-400 mt-1 text-lg"></p>
+    </header>
+
+    <!-- ===== MAIN GRID ===== -->
+    <main class="max-w-5xl mx-auto px-4 pb-16 grid gap-6 md:grid-cols-2">
+
+      <!-- ── Focus Timer ── -->
+      <section class="card" aria-label="Focus Timer">
+        <h2 class="section-title">⏱ Focus Timer</h2>
+
+        <div class="flex flex-col items-center gap-4 mt-4">
+          <!-- Timer display row with ±5 adjust buttons -->
+          <div class="flex items-center gap-4">
+            <button id="btn-minus5" class="btn btn-ghost timer-adjust-btn" aria-label="Subtract 5 minutes">−5</button>
+            <div
+              id="timer-display"
+              class="text-7xl font-bold tabular-nums text-white tracking-tight"
+            >25:00</div>
+            <button id="btn-plus5" class="btn btn-ghost timer-adjust-btn" aria-label="Add 5 minutes">+5</button>
+          </div>
+
+          <div class="flex gap-3 mt-2">
+            <button id="btn-start"  class="btn btn-primary">Start</button>
+            <button id="btn-stop"   class="btn btn-secondary">Stop</button>
+            <button id="btn-reset"  class="btn btn-ghost">Reset</button>
+          </div>
+
+          <p id="timer-status" class="text-sm text-gray-400 mt-1">Ready to focus</p>
+        </div>
+      </section>
+
+      <!-- ── To-Do List ── -->
+      <section class="card" aria-label="To-Do List">
+        <h2 class="section-title">✅ To-Do List</h2>
+
+        <!-- Add / edit input -->
+        <div class="flex gap-2 mt-4">
+          <input
+            id="todo-input"
+            type="text"
+            placeholder="Add a new task…"
+            maxlength="120"
+            class="flex-1 input-field"
+          />
+          <button id="todo-add-btn" class="btn btn-primary px-4">Add</button>
+        </div>
+
+        <!-- Duplicate warning (hidden until triggered) -->
+        <div id="todo-warning" role="alert" aria-live="polite">
+          <span aria-hidden="true">⚠️</span>
+          <span id="todo-warning-text">A task with this name already exists.</span>
+        </div>
+
+        <!-- Task list -->
+        <ul id="todo-list" class="mt-4 space-y-2 max-h-72 overflow-y-auto pr-1">
+          <!-- tasks injected by JS -->
+        </ul>
+
+        <p id="todo-empty" class="text-center text-gray-500 mt-6 text-sm hidden">
+          No tasks yet. Add one above!
+        </p>
+      </section>
+
+      <!-- ── Quick Links (full width) ── -->
+      <section class="card md:col-span-2" aria-label="Quick Links">
+        <div class="flex items-center justify-between">
+          <h2 class="section-title">🔗 Quick Links</h2>
+          <button id="add-link-btn" class="btn btn-ghost text-sm">+ Add Link</button>
+        </div>
+
+        <!-- Add-link form (hidden by default) -->
+        <div id="link-form" class="hidden mt-4 flex flex-wrap gap-2 items-end">
+          <input
+            id="link-name-input"
+            type="text"
+            placeholder="Label (e.g. GitHub)"
+            maxlength="30"
+            class="input-field w-36"
+          />
+          <input
+            id="link-url-input"
+            type="url"
+            placeholder="https://…"
+            class="input-field flex-1 min-w-48"
+          />
+          <button id="link-save-btn" class="btn btn-primary">Save</button>
+          <button id="link-cancel-btn" class="btn btn-ghost">Cancel</button>
+        </div>
+
+        <!-- Links grid -->
+        <div id="links-grid" class="mt-4 flex flex-wrap gap-3">
+          <!-- link chips injected by JS -->
+        </div>
+
+        <p id="links-empty" class="text-gray-500 text-sm mt-4 hidden">
+          No links saved yet. Click "+ Add Link" to get started.
+        </p>
+      </section>
+
+    </main>
+
+    <!-- Edit-task modal -->
+    <div
+      id="edit-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="edit-modal-title"
+      class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden"
+    >
+      <div class="bg-gray-800 rounded-2xl p-6 w-full max-w-sm mx-4 shadow-2xl">
+        <h3 id="edit-modal-title" class="text-lg font-semibold mb-4">Edit Task</h3>
+        <input
+          id="edit-input"
+          type="text"
+          maxlength="120"
+          class="input-field w-full"
+        />
+        <div class="flex justify-end gap-3 mt-4">
+          <button id="edit-cancel-btn" class="btn btn-ghost">Cancel</button>
+          <button id="edit-save-btn"   class="btn btn-primary">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- App script -->
+    <script src="js/app.js"></script>
+  </body>
+</html>
